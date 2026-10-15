@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Evaluation Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    // Only signed-in HR users may view the dashboard
+    if (!sessionStorage.getItem('hr_session') && sessionStorage.getItem('eval_auth') !== 'true') {
+      window.location.replace('/hr-auth/');
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 sm:p-6 selection:bg-indigo-500/30">
+
+  <!-- Header -->
+  <header class="w-full max-w-6xl mx-auto flex items-center justify-between pb-6 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+        <i class="fa-solid fa-users-viewfinder"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-white">HR Candidate Evaluation</h1>
+        <p class="text-xs text-slate-400">Real-time candidate submissions & answer sheet auditor</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button onclick="refreshDashboard()" class="w-9 h-9 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 text-xs transition" title="Refresh dashboard" aria-label="Refresh dashboard">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+      <button onclick="clearAllData()" class="px-3.5 py-2 rounded-xl border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition">
+        <i class="fa-solid fa-trash-can mr-1"></i> Clear All Data
+      </button>
+      <span id="hrUserEmail" class="hidden md:inline text-xs text-slate-400 font-mono"></span>
+      <button onclick="logoutHr()" class="px-3.5 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold transition">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+      </button>
+      <a href="/" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
+        Home <i class="fa-solid fa-house ml-1 text-[10px]"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="w-full max-w-6xl mx-auto py-8 flex-1">
+    
+    <!-- KPI Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Evaluated</span>
+          <h3 id="statTotal" class="text-3xl font-extrabold text-white mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-user-group"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Average Score</span>
+          <h3 id="statAverage" class="text-3xl font-extrabold text-sky-400 mt-1">0%</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Eligible (Pass >= 60%)</span>
+          <h3 id="statEligible" class="text-3xl font-extrabold text-emerald-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Not Eligible</span>
+          <h3 id="statNotEligible" class="text-3xl font-extrabold text-rose-400 mt-1">0</h3>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candidate List Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 class="font-bold text-white text-base">Candidate Roster</h3>
+          <p class="text-xs text-slate-500 mt-1">Review submitted assessments and answer breakdowns.</p>
+        </div>
+        <span class="self-start text-xs px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">
+          <i class="fa-solid fa-rotate animate-spin mr-1"></i> Live Auto-Sync Active
+        </span>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 mb-4">
+        <label class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-xs text-slate-500"></i>
+          <input id="candidateSearch" type="search" placeholder="Search name, email, or role..." class="w-full rounded-xl border border-slate-800 bg-slate-950/70 py-2.5 pl-9 pr-3 text-xs text-white placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        </label>
+        <select id="eligibilityFilter" class="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2.5 text-xs text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="ALL">All statuses</option>
+          <option value="REGISTERED">Registered, not assessed</option>
+          <option value="ELIGIBLE">Eligible only</option>
+          <option value="NOT ELIGIBLE">Not eligible only</option>
+        </select>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-xs text-slate-300">
+          <thead class="bg-slate-800/80 uppercase text-[11px] text-slate-400">
+            <tr>
+              <th class="p-3.5 rounded-l-xl">Candidate Name & Contact</th>
+              <th class="p-3.5">Role</th>
+              <th class="p-3.5">Score</th>
+              <th class="p-3.5">Eligibility</th>
+              <th class="p-3.5 rounded-r-xl text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="candidateTableBody" class="divide-y divide-slate-800">
+            <!-- Dynamically populated from localStorage -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Detailed Answers Sheet Modal -->
+  <div id="answerSheetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 sm:p-7 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+      <button onclick="closeModal()" class="w-8 h-8 rounded-lg flex items-center justify-center absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="mb-5 pb-3 border-b border-slate-800">
+        <h3 id="modalName" class="text-lg font-bold text-white">Candidate Name</h3>
+        <p id="modalRoleContact" class="text-xs text-indigo-400 mt-0.5"></p>
+      </div>
+
+      <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 mb-5">
+        <div>
+          <span class="text-slate-400 text-xs">Total Score:</span>
+          <strong id="modalScore" class="text-white text-sm ml-1"></strong>
+        </div>
+        <div>
+          <span class="text-slate-400 text-xs">Eligibility Status:</span>
+          <span id="modalEligibleBadge" class="ml-1 px-2.5 py-0.5 rounded text-xs font-bold uppercase"></span>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">All Questions Answered:</h4>
+      
+      <!-- Questions breakdown list -->
+      <div id="modalQuestionsList" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-xs text-slate-600 py-4">
+    AI-Based Interview Evaluation System &copy; 2026
+  </footer>
+
+  <script>
+    let allCandidates = [];
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[character]));
+    }
+
+    function getInitials(name) {
+      return String(name || 'NA')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0].toUpperCase())
+        .join('');
+    }
+
+    function getCandidateRecords() {
+      const profiles = JSON.parse(localStorage.getItem('candidate_profiles') || '[]');
+      const results = JSON.parse(localStorage.getItem('ai_interview_candidates') || '[]');
+      const records = profiles.map(profile => ({ ...profile, hasResult: false, status: 'REGISTERED' }));
+
+      results.forEach(result => {
+        const resultEmail = String(result.email || '').toLowerCase();
+        const profileIndex = records.findIndex(profile => String(profile.email || '').toLowerCase() === resultEmail);
+        if (profileIndex >= 0) {
+          records[profileIndex] = { ...records[profileIndex], ...result, hasResult: true, status: result.eligible };
+        } else {
+          records.push({ ...result, hasResult: true, status: result.eligible });
+        }
+      });
+
+      return records;
+    }
+
+    function loadCandidates() {
+      allCandidates = getCandidateRecords();
+      const search = document.getElementById('candidateSearch')?.value.trim().toLowerCase() || '';
+      const status = document.getElementById('eligibilityFilter')?.value || 'ALL';
+      const candidates = allCandidates
+        .map((candidate, index) => ({ candidate, index }))
+        .filter(({ candidate }) => {
+          const searchable = `${candidate.name || ''} ${candidate.email || ''} ${candidate.role || ''}`.toLowerCase();
+          return (!search || searchable.includes(search)) && (status === 'ALL' || candidate.status === status);
+        });
+      const tbody = document.getElementById('candidateTableBody');
+      tbody.innerHTML = '';
+
+      // Update counters
+      document.getElementById('statTotal').innerText = allCandidates.length;
+      document.getElementById('statEligible').innerText = allCandidates.filter(c => c.eligible === 'ELIGIBLE').length;
+      document.getElementById('statNotEligible').innerText = allCandidates.filter(c => c.eligible === 'NOT ELIGIBLE').length;
+      const assessed = allCandidates.filter(c => c.hasResult);
+      const average = assessed.length
+        ? assessed.reduce((sum, candidate) => sum + Number(candidate.score || 0), 0) / assessed.length
+        : 0;
+      document.getElementById('statAverage').innerText = `${average.toFixed(1)}%`;
+
+      if (candidates.length === 0) {
+        const hasFilters = search || status !== 'ALL';
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-500 font-medium">${hasFilters ? 'No candidates match these filters.' : 'No candidate assessments have been submitted yet.'}<br><span class="text-xs text-slate-600">${hasFilters ? 'Try a different search or status.' : 'Submitted assessments will appear here.'}</span></td></tr>`;
+        return;
+      }
+
+      candidates.forEach(({ candidate: c, index }) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition";
+
+          const isEligible = (c.eligible === 'ELIGIBLE');
+          const badge = !c.hasResult
+            ? '<span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">REGISTERED</span>'
+            : isEligible
+          ? '<span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ELIGIBLE</span>'
+          : '<span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">NOT ELIGIBLE</span>';
+
+          const scoreCell = c.hasResult
+            ? `<strong class="text-indigo-400">${escapeHtml(c.score)}%</strong><span class="block text-[10px] text-slate-500 mt-0.5">${escapeHtml(c.correctCount)}/${escapeHtml(c.totalQuestions)} correct</span>`
+            : '<span class="text-amber-400 font-semibold">Pending</span><span class="block text-[10px] text-slate-500 mt-0.5">Assessment not submitted</span>';
+
+        tr.innerHTML = `
+          <td class="p-3.5">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-[11px] font-bold shrink-0">${escapeHtml(getInitials(c.name))}</div>
+              <div class="min-w-0"><div class="font-bold text-white truncate">${escapeHtml(c.name)}</div>
+              <div class="text-[11px] text-slate-400 font-mono truncate">${escapeHtml(c.email)}${c.phone ? ` | ${escapeHtml(c.phone)}` : ''}</div>
+              <div class="text-[10px] text-slate-500 truncate">${escapeHtml(c.location || c.education || 'Profile registered')}</div></div>
+            </div>
+          </td>
+          <td class="p-3.5 font-medium text-slate-300">${escapeHtml(c.role)}</td>
+          <td class="p-3.5">${scoreCell}</td>
+          <td class="p-3.5">${badge}</td>
+          <td class="p-3.5 text-right">
+            <button data-candidate-index="${index}" class="inspect-answer px-3.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-semibold text-xs transition">
+              <i class="fa-solid fa-eye mr-1"></i> Inspect
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewAnswers(index) {
+      const c = allCandidates[index];
+      if (!c) return;
+
+      document.getElementById('modalName').innerText = c.name || 'Candidate';
+      document.getElementById('modalRoleContact').innerText = `Role: ${c.role || 'Not provided'} | Email: ${c.email || 'Not provided'}${c.phone ? ` | Phone: ${c.phone}` : ''}`;
+      document.getElementById('modalScore').innerText = c.hasResult
+        ? `${c.score}% (${c.correctCount}/${c.totalQuestions} Correct)`
+        : 'Assessment pending';
+
+      const badge = document.getElementById('modalEligibleBadge');
+      if (!c.hasResult) {
+        badge.className = "ml-1 px-2.5 py-0.5 rounded text-xs font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        badge.innerText = "REGISTERED";
+      } else if (c.eligible === 'ELIGIBLE') {
+        badge.className = "ml-1 px-2.5 py-0.5 rounded text-xs font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        badge.innerText = "ELIGIBLE";
+      } else {
+        badge.className = "ml-1 px-2.5 py-0.5 rounded text-xs font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        badge.innerText = "NOT ELIGIBLE";
+      }
+
+      const list = document.getElementById('modalQuestionsList');
+      list.innerHTML = '';
+
+      if (!c.hasResult || !Array.isArray(c.answers)) {
+        list.innerHTML = `<div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 text-xs text-slate-300">
+          <p class="font-bold text-amber-400 mb-2">Candidate profile</p>
+          <p>Location: ${escapeHtml(c.location || 'Not provided')}</p>
+          <p>Education: ${escapeHtml(c.education || 'Not provided')}</p>
+          <p>Phone: ${escapeHtml(c.phone || 'Not provided')}</p>
+          <p class="mt-2 text-slate-500">The result will appear here after the candidate submits the assessment.</p>
+        </div>`;
+        document.getElementById('answerSheetModal').classList.remove('hidden');
+        return;
+      }
+
+      c.answers.forEach(ans => {
+        const item = document.createElement('div');
+        item.className = `p-3.5 rounded-xl border ${
+          ans.isCorrect ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-rose-500/30 bg-rose-500/5'
+        }`;
+
+        item.innerHTML = `
+          <p class="font-bold text-slate-200 text-xs mb-1.5">${escapeHtml(ans.question)}</p>
+          <div class="flex justify-between items-center text-[11px]">
+            <span>Candidate answer: <strong class="${ans.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${escapeHtml(ans.candidateChosen)}</strong></span>
+            <span class="font-mono font-bold px-2 py-0.5 rounded text-[10px] ${ans.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+              ${ans.isCorrect ? 'CORRECT' : 'INCORRECT'}
+            </span>
+          </div>
+          ${!ans.isCorrect ? `<p class="text-[11px] text-slate-400 mt-1">Correct answer: <strong class="text-emerald-400">${escapeHtml(ans.correctAnswer)}</strong></p>` : ''}
+        `;
+        list.appendChild(item);
+      });
+
+      document.getElementById('answerSheetModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('answerSheetModal').classList.add('hidden');
+    }
+
+    function clearAllData() {
+      if (confirm("Delete all candidate assessment data? This cannot be undone.")) {
+        localStorage.removeItem('ai_interview_candidates');
+        localStorage.removeItem('candidate_profiles');
+        loadCandidates();
+      }
+    }
+
+    function logoutHr() {
+      sessionStorage.removeItem('hr_session');
+      sessionStorage.removeItem('eval_auth');
+      window.location.replace('/hr-auth/');
+    }
+
+    function refreshDashboard() {
+      loadCandidates();
+    }
+
+    // Auto update jab candidate test submit kare
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'ai_interview_candidates' || e.key === 'candidate_profiles') {
+        loadCandidates();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const session = JSON.parse(sessionStorage.getItem('hr_session') || 'null');
+        if (session && session.email) document.getElementById('hrUserEmail').innerText = session.email;
+      } catch (e) {}
+      document.getElementById('candidateSearch').addEventListener('input', loadCandidates);
+      document.getElementById('eligibilityFilter').addEventListener('change', loadCandidates);
+      document.getElementById('candidateTableBody').addEventListener('click', event => {
+        const button = event.target.closest('.inspect-answer');
+        if (button) viewAnswers(Number(button.dataset.candidateIndex));
+      });
+      loadCandidates();
+    });
+  </script>
+</body>
+</html>
