@@ -16,4 +16,4 @@ def interview(request):
     return render(request, 'interview.html')
 
 def admin_page(request):
-    return render(request, 'core/admindashboard.html')
+    return render(request, 'core/hr-auth.html')
