@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Candidate Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+  <main class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+    <header class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">HR Portal</p>
+        <h1 class="mt-1 text-2xl font-bold">Candidate performance</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Registered candidates and their submitted interview results.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <p id="hr-name" class="text-sm font-semibold"></p>
+          <p id="hr-email" class="text-xs text-slate-500 dark:text-slate-400"></p>
+        </div>
+        <button id="logout-button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Sign out</button>
+      </div>
+    </header>
+
+    <section class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Candidate statistics">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Registered candidates</p>
+        <p id="registered-count" class="mt-2 text-3xl font-bold">0</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Completed interviews</p>
+        <p id="completed-count" class="mt-2 text-3xl font-bold">0</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Average interview score</p>
+        <p id="average-score" class="mt-2 text-3xl font-bold">—</p>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Eligible candidates (60%+)</p>
+        <p id="eligible-count" class="mt-2 text-3xl font-bold">0</p>
+      </article>
+    </section>
+
+    <section class="mb-6 grid gap-6 lg:grid-cols-2">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="font-bold">Average performance by section</h2>
+        <p class="mb-5 mt-1 text-xs text-slate-500 dark:text-slate-400">Calculated from submitted assessments only.</p>
+        <div id="section-performance" class="space-y-4"></div>
+      </article>
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="font-bold">Latest interview submissions</h2>
+        <div id="recent-submissions" class="mt-4 space-y-3 text-sm"></div>
+      </article>
+    </section>
+
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-5 dark:border-slate-800">
+        <div>
+          <h2 class="font-bold">Registered candidates</h2>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Only profiles submitted through candidate registration are listed.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <input id="candidate-search" type="search" placeholder="Search name, email, or role" class="w-64 rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-sm dark:border-slate-700">
+          <select id="candidate-filter" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+            <option value="ALL">All candidates</option>
+            <option value="COMPLETED">Interview completed</option>
+            <option value="PENDING">Interview pending</option>
+          </select>
+          <button id="refresh-button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Refresh</button>
+          <button id="export-button" class="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Export CSV</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-sm">
+          <thead class="bg-slate-100 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+            <tr>
+              <th class="p-4">Candidate</th>
+              <th class="p-4">Role</th>
+              <th class="p-4">Interview score</th>
+              <th class="p-4">Status</th>
+              <th class="p-4">Completed</th>
+              <th class="p-4 text-right">Performance</th>
+            </tr>
+          </thead>
+          <tbody id="candidate-rows" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="performance-modal" class="fixed inset-0 z-20 hidden items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+    <section class="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="modal-name" class="text-lg font-bold"></h2>
+          <p id="modal-details" class="mt-1 text-sm text-slate-500 dark:text-slate-400"></p>
+        </div>
+        <button id="close-modal" class="rounded-lg px-3 py-1 text-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close performance details">&times;</button>
+      </div>
+      <div id="modal-performance" class="my-5 grid gap-3 sm:grid-cols-3"></div>
+      <h3 class="mb-3 font-semibold">Answer review</h3>
+      <div id="modal-answers" class="space-y-3"></div>
+    </section>
+  </div>
+
+  <script>
+    const profileKey = 'candidate_profiles';
+    const resultKey = 'ai_interview_candidates';
+    let candidates = [];
+
+    function readArray(key) {
+      const raw = localStorage.getItem(key);
+      if (!raw) return [];
+      const value = JSON.parse(raw);
+      if (!Array.isArray(value)) throw new Error(`Stored ${key} data must be a list.`);
+      return value;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[character]));
+    }
+
+    function resultForProfile(profile, results) {
+      const email = String(profile.email || '').trim().toLowerCase();
+      return results.find(result => String(result.email || '').trim().toLowerCase() === email) || null;
+    }
+
+    function scorePart(value) {
+      const match = String(value || '').match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/);
+      return match && Number(match[2]) > 0 ? (Number(match[1]) / Number(match[2])) * 100 : null;
+    }
+
+    function showStorageError(error) {
+      console.error('Unable to load candidate data:', error);
+      document.getElementById('candidate-rows').innerHTML =
+        '<tr><td colspan="6" class="p-8 text-center text-rose-600">Candidate data could not be loaded. Please refresh or check the browser storage.</td></tr>';
+    }
+
+    function loadDashboard() {
+      try {
+        const profiles = readArray(profileKey).filter(profile =>
+          profile && (
+            profile.isRegistered === true ||
+            ['experience', 'phone', 'location', 'education', 'linkedIn', 'photo']
+              .some(field => Object.prototype.hasOwnProperty.call(profile, field))
+          ) &&
+          String(profile.name || '').trim() &&
+          String(profile.email || '').trim()
+        );
+        const results = readArray(resultKey);
+        candidates = profiles.map(profile => ({
+          ...profile,
+          result: resultForProfile(profile, results)
+        }));
+        renderDashboard();
+      } catch (error) {
+        showStorageError(error);
+      }
+    }
+
+    function renderDashboard() {
+      const completed = candidates.filter(candidate => candidate.result);
+      const average = completed.length
+        ? completed.reduce((sum, candidate) => sum + Number(candidate.result.score || 0), 0) / completed.length
+        : null;
+      document.getElementById('registered-count').textContent = candidates.length;
+      document.getElementById('completed-count').textContent = completed.length;
+      document.getElementById('average-score').textContent = average === null ? '—' : `${average.toFixed(1)}%`;
+      document.getElementById('eligible-count').textContent =
+        completed.filter(candidate => Number(candidate.result.score) >= 60).length;
+      renderSectionPerformance(completed);
+      renderRecentSubmissions(completed);
+      renderCandidateRows();
+    }
+
+    function renderSectionPerformance(completed) {
+      const sections = [
+        ['Multiple choice', 'mcqScore'],
+        ['Voice answers', 'voiceScore'],
+        ['Coding challenges', 'codeScore']
+      ];
+      const container = document.getElementById('section-performance');
+      container.innerHTML = '';
+      sections.forEach(([label, field]) => {
+        const scores = completed.map(candidate => scorePart(candidate.result[field])).filter(score => score !== null);
+        const average = scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : null;
+        const row = document.createElement('div');
+        row.innerHTML = `
+          <div class="mb-1 flex justify-between text-sm"><span>${label}</span><strong>${average === null ? '—' : `${average.toFixed(1)}%`}</strong></div>
+          <div class="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"><div class="h-full rounded-full bg-indigo-600" style="width:${average === null ? 0 : Math.min(100, Math.max(0, average))}%"></div></div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderRecentSubmissions(completed) {
+      const container = document.getElementById('recent-submissions');
+      const recent = completed
+        .slice()
+        .sort((left, right) => new Date(right.result.completedAt || 0) - new Date(left.result.completedAt || 0))
+        .slice(0, 4);
+      if (!recent.length) {
+        container.innerHTML = '<p class="text-slate-500 dark:text-slate-400">No interviews have been submitted yet.</p>';
+        return;
+      }
+      container.innerHTML = recent.map(candidate => `
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 dark:border-slate-800">
+          <div class="min-w-0">
+            <p class="truncate font-semibold">${escapeHtml(candidate.name)}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(candidate.role || 'Role not specified')}</p>
+          </div>
+          <strong class="shrink-0 text-indigo-600 dark:text-indigo-400">${escapeHtml(candidate.result.score)}%</strong>
+        </div>
+      `).join('');
+    }
+
+    function renderCandidateRows() {
+      const query = document.getElementById('candidate-search').value.trim().toLowerCase();
+      const filter = document.getElementById('candidate-filter').value;
+      const visible = candidates.filter(candidate => {
+        const matchesQuery = `${candidate.name} ${candidate.email} ${candidate.role || ''}`.toLowerCase().includes(query);
+        const matchesFilter = filter === 'ALL' || (filter === 'COMPLETED' ? Boolean(candidate.result) : !candidate.result);
+        return matchesQuery && matchesFilter;
+      });
+      const body = document.getElementById('candidate-rows');
+      if (!visible.length) {
+        const message = candidates.length
+          ? 'No registered candidates match this search or filter.'
+          : 'No candidates have registered yet.';
+        body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">${message}</td></tr>`;
+        return;
+      }
+      body.innerHTML = visible.map(candidate => {
+        const result = candidate.result;
+        const eligible = result && Number(result.score) >= 60;
+        return `
+          <tr>
+            <td class="p-4"><div class="font-semibold">${escapeHtml(candidate.name)}</div><div class="mt-1 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(candidate.email)}</div></td>
+            <td class="p-4">${escapeHtml(candidate.role || '—')}</td>
+            <td class="p-4 font-semibold">${result ? `${escapeHtml(result.score)}%` : '—'}</td>
+            <td class="p-4"><span class="rounded-full px-2.5 py-1 text-xs font-semibold ${result ? (eligible ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300') : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'}">${result ? (eligible ? 'Eligible' : 'Not eligible') : 'Interview pending'}</span></td>
+            <td class="p-4">${result ? escapeHtml(result.completedAt || 'Submitted') : '—'}</td>
+            <td class="p-4 text-right">${result ? `<button class="view-performance rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700" data-email="${escapeHtml(candidate.email)}">View performance</button>` : '<span class="text-xs text-slate-500">No score yet</span>'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function showPerformance(email) {
+      const candidate = candidates.find(item => String(item.email).toLowerCase() === email.toLowerCase());
+      if (!candidate || !candidate.result) return;
+      const result = candidate.result;
+      document.getElementById('modal-name').textContent = candidate.name;
+      document.getElementById('modal-details').textContent = `${candidate.email} · ${candidate.role || 'Role not specified'} · ${result.score}% overall`;
+      document.getElementById('modal-performance').innerHTML = [
+        ['Multiple choice', result.mcqScore],
+        ['Voice answers', result.voiceScore],
+        ['Coding challenges', result.codeScore]
+      ].map(([label, score]) => `<div class="rounded-xl bg-slate-100 p-3 dark:bg-slate-800"><p class="text-xs text-slate-500 dark:text-slate-400">${label}</p><p class="mt-1 font-bold">${escapeHtml(score || '—')}</p></div>`).join('');
+      const answers = Array.isArray(result.answers) ? result.answers : [];
+      document.getElementById('modal-answers').innerHTML = answers.length
+        ? answers.map(answer => `
+          <article class="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+            <p class="font-semibold">${escapeHtml(answer.question || 'Question')}</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Candidate answer: ${escapeHtml(answer.candidateChosen || 'No answer recorded')}</p>
+            <p class="mt-1 text-xs ${answer.isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${answer.isCorrect ? 'Correct' : `Incorrect · Expected: ${escapeHtml(answer.correctAnswer || '—')}`}</p>
+          </article>
+        `).join('')
+        : '<p class="text-sm text-slate-500">Detailed answer review is not available for this submission.</p>';
+      document.getElementById('performance-modal').classList.replace('hidden', 'flex');
+    }
+
+    function exportCandidates() {
+      const rows = [['Name', 'Email', 'Role', 'Score', 'Eligibility', 'Completed']];
+      candidates.forEach(candidate => {
+        const result = candidate.result;
+        rows.push([
+          candidate.name,
+          candidate.email,
+          candidate.role || '',
+          result ? `${result.score}%` : '',
+          result ? (Number(result.score) >= 60 ? 'Eligible' : 'Not eligible') : 'Interview pending',
+          result ? result.completedAt || '' : ''
+        ]);
+      });
+      const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      link.download = 'registered-candidates.csv';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function initializeDashboard() {
+      const rawSession = sessionStorage.getItem('hr_session');
+      if (!rawSession) {
+        window.location.replace('/hr-auth/');
+        return;
+      }
+      let hrSession;
+      try {
+        hrSession = JSON.parse(rawSession);
+      } catch (error) {
+        console.error('Unable to read the HR session:', error);
+        sessionStorage.removeItem('hr_session');
+        window.location.replace('/hr-auth/');
+        return;
+      }
+      if (!hrSession || !hrSession.email) {
+        sessionStorage.removeItem('hr_session');
+        window.location.replace('/hr-auth/');
+        return;
+      }
+      document.getElementById('hr-name').textContent = hrSession.name || hrSession.role || 'HR Recruiter';
+      document.getElementById('hr-email').textContent = hrSession.email;
+      loadDashboard();
+    }
+
+    document.getElementById('candidate-search').addEventListener('input', renderCandidateRows);
+    document.getElementById('candidate-filter').addEventListener('change', renderCandidateRows);
+    document.getElementById('refresh-button').addEventListener('click', loadDashboard);
+    document.getElementById('export-button').addEventListener('click', exportCandidates);
+    document.getElementById('logout-button').addEventListener('click', () => {
+      sessionStorage.removeItem('hr_session');
+      window.location.assign('/hr-auth/');
+    });
+    document.getElementById('candidate-rows').addEventListener('click', event => {
+      const button = event.target.closest('.view-performance');
+      if (button) showPerformance(button.dataset.email);
+    });
+    document.getElementById('close-modal').addEventListener('click', () => {
+      document.getElementById('performance-modal').classList.replace('flex', 'hidden');
+    });
+    document.getElementById('performance-modal').addEventListener('click', event => {
+      if (event.target.id === 'performance-modal') event.currentTarget.classList.replace('flex', 'hidden');
+    });
+    window.addEventListener('storage', event => {
+      if (!event.key || event.key === profileKey || event.key === resultKey) loadDashboard();
+    });
+    initializeDashboard();
+  </script>
+</body>
+</html>

@@ -641,12 +641,22 @@
     window.addEventListener('DOMContentLoaded', () => {
       // 1. Session Candidate Retrieval
       const savedCand = sessionStorage.getItem('interview_candidate') || sessionStorage.getItem('current_active_candidate');
-      if (savedCand) {
-        try { candidate = JSON.parse(savedCand); } catch (e) {
-          candidate = { name: "Candidate Applicant", email: "candidate@eval.ai", role: "Full Stack Engineer" };
-        }
-      } else {
-        candidate = { name: "Candidate Applicant", email: "candidate@eval.ai", role: "Software Engineer" };
+      if (!savedCand) {
+        window.location.replace('/candidate-auth/');
+        return;
+      }
+      try {
+        candidate = JSON.parse(savedCand);
+      } catch (error) {
+        console.error('Unable to read the candidate session:', error);
+        sessionStorage.removeItem('interview_candidate');
+        sessionStorage.removeItem('current_active_candidate');
+        window.location.replace('/candidate-auth/');
+        return;
+      }
+      if (!candidate || candidate.isRegistered !== true || !candidate.name || !candidate.email) {
+        window.location.replace('/candidate-auth/');
+        return;
       }
 
       document.getElementById('headerCandName').innerText = `Candidate: ${candidate.name || 'Verified'}`;
@@ -1078,10 +1088,10 @@
       const isEligible = (percentage >= 60);
 
       const candidateSubmission = {
-        name: candidate.name || "Candidate Applicant",
-        email: (candidate.email || "candidate@eval.ai").toLowerCase(),
-        phone: candidate.phone || "9876543210",
-        role: candidate.role || "Software Developer",
+        name: candidate.name,
+        email: candidate.email.toLowerCase(),
+        phone: candidate.phone || '',
+        role: candidate.role || '',
         score: percentage,
         correctCount: totalCorrect,
         mcqScore: `${mcqCorrect}/20`,

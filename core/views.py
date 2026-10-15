@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 def welcome(request):
-    return render(request, 'welcome.html')
+    return render(request, 'index.html')
 
 def candidate_auth(request):
     return render(request, 'candidate-auth.html')
@@ -16,4 +16,4 @@ def interview(request):
     return render(request, 'interview.html')
 
 def admin_page(request):
-    return render(request, 'admin.html')
+    return render(request, 'core/admindashboard.html')

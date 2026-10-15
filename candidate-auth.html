@@ -223,18 +223,18 @@
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Candidate Email</label>
           <div class="relative">
             <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-            <input type="email" id="loginEmail" required placeholder="alex.candidate@eval.ai" value="alex.candidate@eval.ai" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            <input type="email" id="loginEmail" required placeholder="Your registered email" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
           </div>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Password</label>
-            <button type="button" onclick="autofillDemoCandidate()" class="text-[11px] font-semibold text-brand-600 dark:text-emerald-400 hover:underline">Autofill Demo</button>
+            <button type="button" onclick="switchAuthTab('signup')" class="text-[11px] font-semibold text-brand-600 dark:text-emerald-400 hover:underline">Register new candidate</button>
           </div>
           <div class="relative">
             <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-            <input type="password" id="loginPass" required placeholder="••••••••••••" value="Candidate#2026" class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            <input type="password" id="loginPass" required placeholder="Your password" class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
             <button type="button" onclick="togglePassVisibility('loginPass', 'eyeLogin')" class="btn-anim-click absolute right-2.5 top-2 w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">
               <i id="eyeLogin" class="fa-regular fa-eye pointer-events-none"></i>
             </button>
@@ -245,7 +245,7 @@
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Interview Invite Code <span class="text-slate-400 font-normal">(Optional)</span></label>
           <div class="relative">
             <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
-            <input type="text" id="loginInviteCode" placeholder="AI-EVAL-2026" value="AI-EVAL-2026" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-mono uppercase text-xs tracking-wider" />
+            <input type="text" id="loginInviteCode" placeholder="AI-EVAL-2026" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-mono uppercase text-xs tracking-wider" />
           </div>
         </div>
 
@@ -612,6 +612,7 @@
       const existingIndex = profiles.findIndex(item => item.email.toLowerCase() === normalizedEmail);
       const savedProfile = {
         ...profile,
+        isRegistered: true,
         email: normalizedEmail,
         registeredAt: profile.registeredAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -627,34 +628,51 @@
 
     function handleLoginSubmit(e) {
       e.preventDefault();
-      triggerSound('success');
-      const email = document.getElementById('loginEmail').value;
-      const code = document.getElementById('loginInviteCode').value || 'AI-EVAL-2026';
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const code = document.getElementById('loginInviteCode').value.trim();
       const btn = document.getElementById('loginSubmitBtn');
+      let registeredProfile;
 
+      try {
+        const profiles = JSON.parse(localStorage.getItem('candidate_profiles') || '[]');
+        if (!Array.isArray(profiles)) throw new Error('Candidate registrations must be stored as a list.');
+        registeredProfile = profiles.find(profile =>
+          profile && (
+            profile.isRegistered === true ||
+            ['experience', 'phone', 'location', 'education', 'linkedIn', 'photo']
+              .some(field => Object.prototype.hasOwnProperty.call(profile, field))
+          ) &&
+          String(profile.email || '').trim().toLowerCase() === email
+        );
+      } catch (error) {
+        console.error('Unable to verify candidate registration:', error);
+        showToast('Candidate registration could not be checked. Please try again.', 'error');
+        return;
+      }
+
+      if (!registeredProfile) {
+        showToast('No registration found for this email. Register as a new candidate first.', 'error');
+        return;
+      }
+
+      triggerSound('success');
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Loading Assessment...`;
       btn.disabled = true;
-
-      // Extract candidate name from email for simulation
-      const inferredName = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-
       setTimeout(() => {
         const candidateProfile = {
-          name: inferredName,
-          email: email,
-          role: 'Full Stack Developer',
-          code: code
+          ...registeredProfile,
+          isRegistered: true,
+          code: code || registeredProfile.code
         };
-        saveCandidateProfile(candidateProfile);
         sessionStorage.setItem('interview_candidate', JSON.stringify({
           ...candidateProfile,
           authenticatedAt: new Date().toISOString()
         }));
 
-        showToast(`Welcome back, ${inferredName}! Launching...`, 'success');
+        showToast(`Welcome back, ${registeredProfile.name}! Launching...`, 'success');
         
         setTimeout(() => {
-          window.location.href = `/instructions/?role=Full%20Stack%20Developer`;
+          window.location.href = `/instructions/?role=${encodeURIComponent(registeredProfile.role || 'Software Engineering')}`;
         }, 800);
       }, 900);
     }
@@ -724,6 +742,7 @@
           education: education,
           linkedIn: linkedIn,
           photo: photo,
+          isRegistered: true,
           code: 'AI-EVAL-2026'
         };
         saveCandidateProfile(candidateProfile);
@@ -751,14 +770,6 @@
         input.type = 'password';
         icon.className = 'fa-regular fa-eye pointer-events-none';
       }
-    }
-
-    function autofillDemoCandidate() {
-      triggerSound('click');
-      document.getElementById('loginEmail').value = 'alex.candidate@eval.ai';
-      document.getElementById('loginPass').value = 'Candidate#2026';
-      document.getElementById('loginInviteCode').value = 'AI-EVAL-2026';
-      showToast('Demo candidate credentials pre-filled!', 'info');
     }
 
     // --- 7. Toast Messaging ---

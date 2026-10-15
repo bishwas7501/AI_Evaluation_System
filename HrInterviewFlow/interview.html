@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprehensive AI Interview Assessment (MCQ + Voice + Coding)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .wave-pulse {
+      animation: pulseWave 1.4s ease-in-out infinite;
+    }
+    .profile-avatar {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(6, 182, 212, 0.25));
+    }
+    .profile-detail {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @keyframes pulseWave {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-indigo-600 selection:text-white select-none">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-slate-800 bg-slate-950 sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-extrabold shadow-lg shadow-indigo-600/30">
+        AI
+      </div>
+      <div>
+        <h1 id="headerCandName" class="text-sm font-bold text-white leading-tight">Candidate: Verified</h1>
+        <p id="headerCandRole" class="text-xs text-indigo-400 font-mono">TRACK: 45 Questions (20 MCQ + 15 Voice + 10 Code)</p>
+      </div>
+    </div>
+
+    <!-- Timer & Finish Button -->
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 font-mono text-xs font-bold">
+        <i class="fa-regular fa-clock"></i>
+        <span id="examTimer">45:00</span>
+      </div>
+      <button onclick="confirmSubmitTest()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Submit Assessment</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONSOLE ==================== -->
+  <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+    
+    <!-- LEFT SIDEBAR: CAMERA & QUESTION PALETTE -->
+    <div class="lg:col-span-1 space-y-4">
+
+      <!-- Candidate Profile -->
+      <div class="glass-card rounded-2xl p-4 border border-indigo-500/20 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Candidate Profile</h2>
+          <i class="fa-solid fa-id-card text-indigo-400 text-xs"></i>
+        </div>
+        <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
+          <div id="profileAvatar" class="profile-avatar w-12 h-12 rounded-full flex items-center justify-center overflow-hidden shrink-0 text-indigo-200 font-bold">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div class="min-w-0">
+            <p id="profileName" class="profile-detail text-sm font-bold text-white">Candidate Applicant</p>
+            <p id="profileEmail" class="profile-detail text-[10px] text-slate-400 font-mono">candidate@eval.ai</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-x-3 gap-y-2 pt-3 text-[10px]">
+          <div class="min-w-0"><span class="block text-slate-500 uppercase tracking-wide">Role</span><p id="profileRole" class="profile-detail text-slate-200 mt-0.5">Software Engineer</p></div>
+          <div class="min-w-0"><span class="block text-slate-500 uppercase tracking-wide">Experience</span><p id="profileExperience" class="profile-detail text-slate-200 mt-0.5">Not provided</p></div>
+          <div class="min-w-0"><span class="block text-slate-500 uppercase tracking-wide">Location</span><p id="profileLocation" class="profile-detail text-slate-200 mt-0.5">Not provided</p></div>
+          <div class="min-w-0"><span class="block text-slate-500 uppercase tracking-wide">Education</span><p id="profileEducation" class="profile-detail text-slate-200 mt-0.5">Not provided</p></div>
+        </div>
+      </div>
+      
+      <!-- Live Proctor Camera Feed -->
+      <div class="glass-card rounded-2xl p-3 border border-slate-800 shadow-xl overflow-hidden">
+        <div class="relative rounded-xl overflow-hidden aspect-video bg-black flex items-center justify-center">
+          <video id="webcamFeed" autoplay playsinline muted class="w-full h-full object-cover"></video>
+          
+          <div class="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/70 text-[10px] text-emerald-400 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> CAMERA ACTIVE
+          </div>
+
+          <div id="camFallback" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900 text-xs text-center p-3">
+            <i class="fa-solid fa-video-slash text-2xl mb-1"></i>
+            <span>Enable Camera in Browser</span>
+          </div>
+        </div>
+
+        <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
+          <span>AI Audio Sentinel:</span>
+          <span id="audioStatusText" class="text-emerald-400 font-mono flex items-center gap-1">
+            <i class="fa-solid fa-microphone-lines"></i> Ready
+          </span>
+        </div>
+      </div>
+
+      <!-- Question Palette Nav -->
+      <div class="glass-card rounded-2xl p-4 border border-slate-800">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Total 45 Questions</h3>
+          <span id="answeredCounter" class="text-[11px] font-mono text-indigo-400">0 / 45 Done</span>
+        </div>
+
+        <!-- Section Jump Shortcuts -->
+        <div class="grid grid-cols-3 gap-1 mb-3">
+          <button onclick="jumpTo(0)" class="py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-mono text-indigo-300 font-bold hover:bg-indigo-500/20 transition">MCQ (1-20)</button>
+          <button onclick="jumpTo(20)" class="py-1 rounded bg-purple-500/10 border border-purple-500/20 text-[10px] font-mono text-purple-300 font-bold hover:bg-purple-500/20 transition">Voice (21-35)</button>
+          <button onclick="jumpTo(35)" class="py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-300 font-bold hover:bg-emerald-500/20 transition">Code (36-45)</button>
+        </div>
+        
+        <!-- Palette 5x9 Grid -->
+        <div id="paletteGrid" class="grid grid-cols-5 gap-1.5 max-h-56 overflow-y-auto pr-1">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-slate-800/80 space-y-1.5 text-[10px] text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40"></span>
+            <span>Answered / Tested</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded border border-indigo-500 bg-indigo-500/30"></span>
+            <span>Current Active Question</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ASSESSMENT CONSOLE -->
+    <div class="lg:col-span-3">
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl relative">
+        
+        <!-- Question Meta -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span id="qRoundBadge" class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              Round 1: MCQ
+            </span>
+            <span id="qCategoryBadge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
+              Web Development
+            </span>
+          </div>
+          <div class="text-xs text-slate-400 font-mono">
+            Question <span id="qCurrentIndexText" class="font-bold text-white">1</span> of 45
+          </div>
+        </div>
+
+        <!-- Question Prompt -->
+        <h2 id="qPromptText" class="text-base sm:text-lg font-bold text-white leading-relaxed mb-6">
+          Loading question...
+        </h2>
+
+        <!-- ==================== CONTAINER 1: MCQ OPTIONS (Q1 - Q20) ==================== -->
+        <div id="mcqOptionsContainer" class="space-y-3 mb-8">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- ==================== CONTAINER 2: VOICE ANSWER CONSOLE (Q21 - Q35) ==================== -->
+        <div id="voiceQuestionContainer" class="hidden space-y-4 mb-8">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-purple-500/30">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
+                  <i class="fa-solid fa-microphone-lines"></i> Spoken Verbal Round
+                </span>
+                <p class="text-xs text-slate-300 mt-1">Press "Start Speaking" and explain your answer aloud. The AI transcribes your words in real time.</p>
+              </div>
+              <button id="toggleRecordBtn" onclick="toggleVoiceRecording()" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30">
+                <i id="recordIcon" class="fa-solid fa-microphone"></i>
+                <span id="recordLabel">Start Speaking</span>
+              </button>
+            </div>
+
+            <!-- Voice Transcript Live Preview Area -->
+            <div class="rounded-xl bg-slate-950 p-4 border border-slate-800 min-h-[120px] flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-1">Live Verbal Transcript:</span>
+                <p id="voiceTranscriptPreview" class="text-xs text-slate-200 leading-relaxed italic">
+                  Press "Start Speaking" and answer aloud into your microphone...
+                </p>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-mono">
+                <span id="wordCountText">0 Words recorded</span>
+                <span id="voiceStatusBadge" class="text-slate-500">Mic Idle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== CONTAINER 3: CODING CHALLENGE (Q36 - Q45) ==================== -->
+        <div id="codingQuestionContainer" class="hidden space-y-4 mb-8">
+          <div class="rounded-2xl border border-emerald-500/30 overflow-hidden bg-slate-950">
+            
+            <!-- Code Bar Header -->
+            <div class="bg-slate-900 px-4 py-2.5 flex items-center justify-between border-b border-slate-800 text-xs">
+              <span class="text-emerald-400 font-mono font-bold flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> solution.js
+              </span>
+              <button onclick="runCodeTest()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-play text-[10px]"></i> Run & Test Code
+              </button>
+            </div>
+
+            <!-- Editor Textarea -->
+            <textarea id="codeEditorInput" spellcheck="false" class="w-full h-48 bg-slate-950 text-cyan-300 font-mono text-xs p-4 focus:outline-none resize-none leading-relaxed"></textarea>
+
+            <!-- Test Output Box -->
+            <div class="bg-slate-900/90 p-3.5 border-t border-slate-800 text-xs font-mono">
+              <div class="flex items-center justify-between mb-1 text-[11px] text-slate-400">
+                <span>Output Console:</span>
+                <span id="codeStatusBadge" class="text-slate-500">Awaiting Run</span>
+              </div>
+              <p id="codeOutputText" class="text-slate-400 text-[11px] leading-relaxed">
+                Click "Run & Test Code" to verify your solution against the test runner...
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+          <button id="prevBtn" onclick="navigate(-1)" class="px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+          </button>
+
+          <button id="nextBtn" onclick="navigate(1)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center gap-1.5">
+            <span>Next Question</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== SUBMISSION / RESULT OVERLAY ==================== -->
+  <div id="completionOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md hidden">
+    <div class="glass-card w-full max-w-lg rounded-3xl p-8 text-center shadow-2xl border border-slate-800">
+      <div id="resultIcon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"></div>
+      <h2 class="text-2xl font-bold text-white mb-1">Assessment Submitted</h2>
+      <p class="text-xs text-slate-400 mb-6">Your answers across all 3 rounds are recorded and visible in the HR console.</p>
+
+      <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-2.5 mb-6 text-xs font-mono">
+        <div class="flex justify-between text-slate-300">
+          <span>Candidate:</span>
+          <strong id="resName" class="text-white font-sans"></strong>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>MCQ Round (20 Qs):</span>
+          <strong id="resMcqScore" class="text-indigo-400"></strong>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Voice Round (15 Qs):</span>
+          <strong id="resVoiceScore" class="text-purple-400"></strong>
+        </div>
+        <div class="flex justify-between text-slate-300">
+          <span>Coding Round (10 Qs):</span>
+          <strong id="resCodeScore" class="text-emerald-400"></strong>
+        </div>
+        <div class="flex justify-between text-slate-300 pt-2 border-t border-slate-800">
+          <span>Total Score (Out of 45):</span>
+          <strong id="resTotalScore" class="text-white text-sm"></strong>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+          <span class="text-slate-400 uppercase font-bold text-[10px]">Eligibility Verdict:</span>
+          <span id="resVerdict" class="px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider font-sans"></span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition">
+          Return Home
+        </a>
+        <a href="/admin-dashboard/" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+          View in HR Console
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-7xl mx-auto px-6 py-4 text-center text-xs text-slate-600 border-t border-slate-900">
+    &copy; 2026 AI-Based Interview Evaluation System. Comprehensive 45-Question Engine.
+  </footer>
+
+  <!-- ==================== COMPLETE 45-QUESTION DATASET & LOGIC ==================== -->
+  <script>
+    const questionsPool = [
+      // ==========================================
+      // ROUND 1: 20 TECHNICAL MCQs (Q1 to Q20)
+      // ==========================================
+      {
+        id: 1, type: "mcq", category: "Web Development",
+        question: "What is the primary architectural difference between CSS Grid and CSS Flexbox?",
+        options: [
+          "Flexbox is two-dimensional, whereas CSS Grid is one-dimensional",
+          "CSS Grid is two-dimensional (rows & columns), whereas Flexbox is one-dimensional (row or column)",
+          "Flexbox is deprecated in modern CSS specifications",
+          "There is no functional difference"
+        ], correct: 1
+      },
+      {
+        id: 2, type: "mcq", category: "JavaScript Core",
+        question: "In JavaScript, what is the output of `typeof NaN`?",
+        options: ["'undefined'", "'null'", "'number'", "'NaN'"],
+        correct: 2
+      },
+      {
+        id: 3, type: "mcq", category: "Web Protocols",
+        question: "Which HTTP status code signifies that a resource has been permanently moved to a new URI?",
+        options: ["301 Moved Permanently", "302 Found", "304 Not Modified", "307 Temporary Redirect"],
+        correct: 0
+      },
+      {
+        id: 4, type: "mcq", category: "Software Engineering",
+        question: "Which SOLID principle states: 'High-level modules should not depend on low-level modules; both should depend on abstractions'?",
+        options: ["Single Responsibility", "Open/Closed", "Interface Segregation", "Dependency Inversion"],
+        correct: 3
+      },
+      {
+        id: 5, type: "mcq", category: "Frontend Frameworks",
+        question: "In React, when does a `useEffect` hook execute if provided an empty dependency array `[]`?",
+        options: [
+          "Runs on every state change and re-render",
+          "Runs once immediately when the component mounts",
+          "Cancels all ongoing network requests",
+          "Prevents child components from updating"
+        ], correct: 1
+      },
+      {
+        id: 6, type: "mcq", category: "Database Systems",
+        question: "Which SQL clause is strictly used to filter records resulting from an aggregated `GROUP BY` operation?",
+        options: ["WHERE", "ORDER BY", "HAVING", "LIMIT"],
+        correct: 2
+      },
+      {
+        id: 7, type: "mcq", category: "Version Control",
+        question: "What is the key difference between `git merge` and `git rebase`?",
+        options: [
+          "Merge changes commit author names, while rebase preserves them",
+          "Rebase rewrites project history by applying commits on top of another base tip; merge retains a distinct merge commit",
+          "Rebase deletes the current working branch",
+          "They perform identical Git operations"
+        ], correct: 1
+      },
+      {
+        id: 8, type: "mcq", category: "Web Security",
+        question: "What major web vulnerability does a strict `Content-Security-Policy (CSP)` header primarily defend against?",
+        options: ["SQL Injection", "Cross-Site Scripting (XSS)", "DDoS attacks", "Buffer Overflows"],
+        correct: 1
+      },
+      {
+        id: 9, type: "mcq", category: "Backend APIs",
+        question: "In RESTful API design, which HTTP method is explicitly designed for partial updates without replacing the whole entity?",
+        options: ["POST", "PATCH", "PUT", "OPTIONS"],
+        correct: 1
+      },
+      {
+        id: 10, type: "mcq", category: "Data Structures",
+        question: "What is the average time complexity of searching a key in a well-distributed Hash Map?",
+        options: ["O(n)", "O(log n)", "O(1)", "O(n^2)"],
+        correct: 2
+      },
+      {
+        id: 11, type: "mcq", category: "Web Performance",
+        question: "Which of the following operations causes the browser rendering engine to trigger a Reflow (Layout recalculation)?",
+        options: [
+          "Changing text `color`",
+          "Modifying DOM element `offsetWidth`, `fontSize`, or `padding`",
+          "Toggling `visibility: hidden`",
+          "Applying a CSS `box-shadow`"
+        ], correct: 1
+      },
+      {
+        id: 12, type: "mcq", category: "Software Patterns",
+        question: "Which Design Pattern ensures that a class has only one instance while providing a global point of access to it?",
+        options: ["Factory Pattern", "Observer Pattern", "Singleton Pattern", "Strategy Pattern"],
+        correct: 2
+      },
+      {
+        id: 13, type: "mcq", category: "Networking",
+        question: "What header combination is required to initiate a WebSocket handshake over HTTP/1.1?",
+        options: [
+          "Connection: Upgrade, Upgrade: websocket",
+          "Transfer-Encoding: chunked",
+          "X-WebSocket: enabled",
+          "Content-Type: application/socket"
+        ], correct: 0
+      },
+      {
+        id: 14, type: "mcq", category: "Node.js Concurrency",
+        question: "In the Node.js Event Loop, where are `process.nextTick()` callbacks resolved?",
+        options: [
+          "In the Timers Phase",
+          "In the Close Callbacks Phase",
+          "Immediately in the Microtask Queue before transitioning to the next event loop phase",
+          "Only after network I/O completes"
+        ], correct: 2
+      },
+      {
+        id: 15, type: "mcq", category: "ACID Properties",
+        question: "In database transaction guarantees, what does 'Atomicity' guarantee?",
+        options: [
+          "All operations succeed completely, or the entire transaction is rolled back",
+          "Transactions never run in parallel",
+          "Data modifications are never cached in memory",
+          "Primary keys are strictly auto-incrementing"
+        ], correct: 0
+      },
+      {
+        id: 16, type: "mcq", category: "Browser Storage",
+        question: "What is the difference between `localStorage` and `sessionStorage`?",
+        options: [
+          "localStorage only holds 1KB of data",
+          "localStorage persists until explicitly cleared; sessionStorage clears when the tab/window session closes",
+          "sessionStorage persists across browser restarts; localStorage does not",
+          "localStorage is accessible only via service workers"
+        ], correct: 1
+      },
+      {
+        id: 17, type: "mcq", category: "Testing & QA",
+        question: "In Test-Driven Development (TDD), what is the correct operational sequence?",
+        options: [
+          "Write Code -> Test -> Refactor",
+          "Red (Failing Test) -> Green (Passing Code) -> Refactor",
+          "Deploy -> Write Integration Tests -> Benchmark",
+          "Refactor -> Write Unit Tests -> Deploy"
+        ], correct: 1
+      },
+      {
+        id: 18, type: "mcq", category: "Web Security",
+        question: "How does the `HttpOnly` flag on a cookie protect authentication sessions?",
+        options: [
+          "Prevents client-side JavaScript (`document.cookie`) from reading the cookie, mitigating XSS session theft",
+          "Forces transmission solely through TLS",
+          "Encrypts cookie data with public key cryptography",
+          "Automatically eliminates CSRF vulnerabilities"
+        ], correct: 0
+      },
+      {
+        id: 19, type: "mcq", category: "Algorithms",
+        question: "What strict precondition is required before executing a Binary Search on an array?",
+        options: [
+          "The array elements must be unique without duplicates",
+          "The array elements must be pre-sorted in order",
+          "The array length must be a power of two",
+          "The array must be structured as a Linked List"
+        ], correct: 1
+      },
+      {
+        id: 20, type: "mcq", category: "DevOps & Cloud",
+        question: "What is the primary difference between a Container (e.g. Docker) and a Virtual Machine (VM)?",
+        options: [
+          "Containers virtualize the full physical hardware; VMs only virtualize apps",
+          "Containers share the host OS kernel and isolate user spaces; VMs virtualize the hardware and run guest OS kernels",
+          "Containers require independent guest operating systems",
+          "There is no architectural difference"
+        ], correct: 1
+      },
+
+      // ==========================================
+      // ROUND 2: 15 VOICE / SPOKEN QUESTIONS (Q21 to Q35)
+      // ==========================================
+      {
+        id: 21, type: "voice", category: "Voice: System Design",
+        question: "Explain aloud: How would you design a scalable URL shortener service (like bit.ly)? What database and caching strategies would you use?",
+        keywords: ["database", "cache", "redis", "hash", "unique", "redirect", "latency", "scale"], idealLength: 15
+      },
+      {
+        id: 22, type: "voice", category: "Voice: Web Internals",
+        question: "Explain aloud: What happens step-by-step when you type a URL in the browser and press Enter? Mention DNS, TCP handshake, and rendering.",
+        keywords: ["dns", "ip", "tcp", "handshake", "tls", "http", "dom", "render", "server"], idealLength: 15
+      },
+      {
+        id: 23, type: "voice", category: "Voice: Concurrency",
+        question: "Explain aloud: What is the core difference between synchronous blocking code and asynchronous non-blocking event-driven execution?",
+        keywords: ["blocking", "non-blocking", "event", "loop", "thread", "promise", "async", "callback"], idealLength: 12
+      },
+      {
+        id: 24, type: "voice", category: "Voice: Authentication",
+        question: "Explain aloud: How does JWT (JSON Web Token) authentication work? What are the tradeoffs between storing tokens in localStorage vs. HttpOnly cookies?",
+        keywords: ["jwt", "token", "header", "payload", "signature", "cookie", "httponly", "xss", "csrf"], idealLength: 15
+      },
+      {
+        id: 25, type: "voice", category: "Voice: Problem Solving",
+        question: "Explain aloud: Describe a challenging bug, memory leak, or latency spike you personally solved. What diagnostic steps did you take?",
+        keywords: ["bug", "debug", "log", "latency", "memory", "profiler", "fix", "code", "issue"], idealLength: 12
+      },
+      {
+        id: 26, type: "voice", category: "Voice: Microservices",
+        question: "Explain aloud: What are the primary trade-offs between a Monolithic architecture and a Microservices architecture? When should a team migrate?",
+        keywords: ["monolith", "microservices", "scale", "deployment", "latency", "complexity", "database", "service"], idealLength: 15
+      },
+      {
+        id: 27, type: "voice", category: "Voice: Database Scaling",
+        question: "Explain aloud: What is database sharding, and how does horizontal partitioning differ from vertical partitioning?",
+        keywords: ["sharding", "partition", "horizontal", "vertical", "scale", "node", "shard", "key"], idealLength: 12
+      },
+      {
+        id: 28, type: "voice", category: "Voice: React Lifecycle",
+        question: "Explain aloud: How does React's Virtual DOM reconciliation and diffing algorithm optimize browser rendering performance?",
+        keywords: ["virtual", "dom", "reconciliation", "diffing", "tree", "batch", "render", "update"], idealLength: 14
+      },
+      {
+        id: 29, type: "voice", category: "Voice: Message Queues",
+        question: "Explain aloud: Why do distributed systems use message brokers like Kafka or RabbitMQ? How do they decouple producers and consumers?",
+        keywords: ["queue", "kafka", "rabbitmq", "decouple", "async", "producer", "consumer", "backpressure"], idealLength: 14
+      },
+      {
+        id: 30, type: "voice", category: "Voice: WebSockets vs Polling",
+        question: "Explain aloud: How does real-time communication via WebSockets differ from HTTP Short Polling and Long Polling?",
+        keywords: ["websocket", "polling", "long", "full-duplex", "handshake", "latency", "connection"], idealLength: 14
+      },
+      {
+        id: 31, type: "voice", category: "Voice: API Security",
+        question: "Explain aloud: What is Cross-Origin Resource Sharing (CORS), and what is the purpose of an HTTP Preflight OPTIONS request?",
+        keywords: ["cors", "origin", "header", "preflight", "options", "security", "browser"], idealLength: 12
+      },
+      {
+        id: 32, type: "voice", category: "Voice: Caching Strategies",
+        question: "Explain aloud: Explain Cache-Aside, Write-Through, and Write-Back caching patterns. How do you handle cache invalidation?",
+        keywords: ["cache", "aside", "write-through", "invalidation", "ttl", "redis", "consistency"], idealLength: 15
+      },
+      {
+        id: 33, type: "voice", category: "Voice: Code Refactoring",
+        question: "Explain aloud: What are 'Code Smells'? Can you explain a scenario where you refactored repetitive code using design principles?",
+        keywords: ["refactor", "smell", "dry", "solid", "function", "clean", "maintainable", "pattern"], idealLength: 12
+      },
+      {
+        id: 34, type: "voice", category: "Voice: Git Workflows",
+        question: "Explain aloud: Explain the difference between Git Flow and Trunk-Based Development. Which is better for Continuous Delivery?",
+        keywords: ["git", "trunk", "flow", "branch", "feature", "continuous", "deployment", "merge"], idealLength: 14
+      },
+      {
+        id: 35, type: "voice", category: "Voice: Behavioral / Conflict",
+        question: "Explain aloud: Describe a technical disagreement you had with a team member about code architecture or libraries. How did you resolve it?",
+        keywords: ["team", "disagreement", "discussion", "benchmark", "agreed", "decision", "resolved", "respect"], idealLength: 14
+      },
+
+      // ==========================================
+      // ROUND 3: 10 CODING CHALLENGES (Q36 to Q45)
+      // ==========================================
+      {
+        id: 36, type: "code", category: "Coding: String Manipulation",
+        question: "Write a JavaScript function `isPalindrome(str)` that returns true if a string is a palindrome (ignoring casing and spaces), otherwise false.",
+        starterCode: "function isPalindrome(str) {\n  // Clean string and check reverse equality\n  const clean = str.toLowerCase().replace(/[^a-z0-9]/g, '');\n  return clean === clean.split('').reverse().join('');\n}",
+        testFn: (fn) => fn("RaceCar") === true && fn("hello") === false
+      },
+      {
+        id: 37, type: "code", category: "Coding: Array Algorithms",
+        question: "Write a function `twoSum(nums, target)` that returns the indices of the two numbers such that they add up to target.",
+        starterCode: "function twoSum(nums, target) {\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const diff = target - nums[i];\n    if (map.has(diff)) return [map.get(diff), i];\n    map.set(nums[i], i);\n  }\n  return [];\n}",
+        testFn: (fn) => JSON.stringify(fn([2, 7, 11, 15], 9)) === "[0,1]"
+      },
+      {
+        id: 38, type: "code", category: "Coding: Data Processing",
+        question: "Write a function `removeDuplicates(arr)` that returns a new array with all duplicate values removed.",
+        starterCode: "function removeDuplicates(arr) {\n  // Return deduplicated array\n  return [...new Set(arr)];\n}",
+        testFn: (fn) => JSON.stringify(fn([1, 2, 2, 3, 4, 4, 5])) === "[1,2,3,4,5]"
+      },
+      {
+        id: 39, type: "code", category: "Coding: Array Chunking",
+        question: "Write a function `chunkArray(arr, size)` that splits an array into sub-arrays of maximum length `size`.",
+        starterCode: "function chunkArray(arr, size) {\n  const res = [];\n  for (let i = 0; i < arr.length; i += size) {\n    res.push(arr.slice(i, i + size));\n  }\n  return res;\n}",
+        testFn: (fn) => fn([1, 2, 3, 4, 5], 2).length === 3
+      },
+      {
+        id: 40, type: "code", category: "Coding: String Counting",
+        question: "Write a function `countVowels(str)` that returns the total count of vowels (a, e, i, o, u) in a string.",
+        starterCode: "function countVowels(str) {\n  const matches = str.match(/[aeiou]/gi);\n  return matches ? matches.length : 0;\n}",
+        testFn: (fn) => fn("JavaScript Engineer") === 7
+      },
+      {
+        id: 41, type: "code", category: "Coding: Array Flattening",
+        question: "Write a function `flattenArray(nestedArr)` that deeply flattens an array of nested arrays into a single level array.",
+        starterCode: "function flattenArray(nestedArr) {\n  // Deep flatten\n  return nestedArr.flat(Infinity);\n}",
+        testFn: (fn) => JSON.stringify(fn([1, [2, [3, [4]], 5]])) === "[1,2,3,4,5]"
+      },
+      {
+        id: 42, type: "code", category: "Coding: Anagram Checker",
+        question: "Write a function `isAnagram(s1, s2)` that checks if two words contain the same characters in any order.",
+        starterCode: "function isAnagram(s1, s2) {\n  const format = str => str.toLowerCase().split('').sort().join('');\n  return format(s1) === format(s2);\n}",
+        testFn: (fn) => fn("listen", "silent") === true && fn("cat", "rat") === false
+      },
+      {
+        id: 43, type: "code", category: "Coding: Number Reversal",
+        question: "Write a function `reverseInt(n)` that reverses the digits of an integer while preserving its positive/negative sign.",
+        starterCode: "function reverseInt(n) {\n  const sign = Math.sign(n);\n  const rev = parseInt(Math.abs(n).toString().split('').reverse().join(''));\n  return sign * rev;\n}",
+        testFn: (fn) => fn(-456) === -654 && fn(120) === 21
+      },
+      {
+        id: 44, type: "code", category: "Coding: Fibonacci Number",
+        question: "Write a function `fibonacci(n)` that returns the n-th Fibonacci number (0, 1, 1, 2, 3, 5, 8, ...).",
+        starterCode: "function fibonacci(n) {\n  if (n <= 0) return 0;\n  if (n === 1) return 1;\n  let a = 0, b = 1;\n  for (let i = 2; i <= n; i++) {\n    let c = a + b;\n    a = b;\n    b = c;\n  }\n  return b;\n}",
+        testFn: (fn) => fn(6) === 8 && fn(7) === 13
+      },
+      {
+        id: 45, type: "code", category: "Coding: Capitalize Words",
+        question: "Write a function `capitalizeWords(str)` that capitalizes the first letter of every word in a sentence.",
+        starterCode: "function capitalizeWords(str) {\n  return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');\n}",
+        testFn: (fn) => fn("full stack software engineer") === "Full Stack Software Engineer"
+      }
+    ];
+
+    let candidate = {};
+    let currentIndex = 0;
+    let selectedAnswers = new Array(questionsPool.length).fill(null);
+    let voiceTranscripts = new Array(questionsPool.length).fill("");
+    let codeSubmissions = {};
+    let timerSeconds = 45 * 60; // 45 Minutes
+    let timerInterval = null;
+
+    // Speech-to-Text Controller
+    let recognition = null;
+    let isRecording = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Session Candidate Retrieval
+      const savedCand = sessionStorage.getItem('interview_candidate') || sessionStorage.getItem('current_active_candidate');
+      if (savedCand) {
+        try { candidate = JSON.parse(savedCand); } catch (e) {
+          candidate = { name: "Candidate Applicant", email: "candidate@eval.ai", role: "Full Stack Engineer" };
+        }
+      } else {
+        candidate = { name: "Candidate Applicant", email: "candidate@eval.ai", role: "Software Engineer" };
+      }
+
+      document.getElementById('headerCandName').innerText = `Candidate: ${candidate.name || 'Verified'}`;
+      document.getElementById('headerCandRole').innerText = `TRACK: ${candidate.role || 'Software Engineering'} (45 Questions)`;
+      populateCandidateProfile();
+
+      // 2. Initialize Camera & Speech
+      initWebcam();
+      initSpeechRecognition();
+
+      // 3. Pre-fill Code Starters
+      questionsPool.forEach(q => {
+        if (q.type === 'code') {
+          codeSubmissions[q.id] = q.starterCode;
+        }
+      });
+
+      // 4. Setup UI
+      buildPalette();
+      renderQuestion(currentIndex);
+      startTimer();
+    });
+
+    function populateCandidateProfile() {
+      const profileValues = {
+        profileName: candidate.name || 'Candidate Applicant',
+        profileEmail: candidate.email || 'candidate@eval.ai',
+        profileRole: candidate.role || 'Software Engineer',
+        profileExperience: candidate.experience || 'Not provided',
+        profileLocation: candidate.location || 'Not provided',
+        profileEducation: candidate.education || 'Not provided'
+      };
+
+      Object.entries(profileValues).forEach(([elementId, value]) => {
+        document.getElementById(elementId).textContent = value;
+      });
+
+      const avatar = document.getElementById('profileAvatar');
+      if (candidate.photo) {
+        const image = document.createElement('img');
+        image.src = candidate.photo;
+        image.alt = `${candidate.name || 'Candidate'} profile photo`;
+        image.className = 'w-full h-full object-cover';
+        avatar.replaceChildren(image);
+      } else {
+        const initials = (candidate.name || 'CA')
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map(part => part[0].toUpperCase())
+          .join('');
+        avatar.textContent = initials;
+      }
+    }
+
+    // Camera Stream
+    async function initWebcam() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('webcamFeed').srcObject = stream;
+        document.getElementById('camFallback').classList.add('hidden');
+      } catch (err) {
+        console.warn("Camera check deferred or unavailable.");
+      }
+    }
+
+    // Web Speech API
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+
+        voiceTranscripts[currentIndex] = transcript.trim();
+        document.getElementById('voiceTranscriptPreview').innerText = transcript || 'Listening...';
+        
+        const words = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
+        document.getElementById('wordCountText').innerText = `${words} Words recorded`;
+        updatePaletteUI();
+      };
+
+      recognition.onerror = () => stopVoiceRecording();
+      recognition.onend = () => { if (isRecording) stopVoiceRecording(); };
+    }
+
+    function toggleVoiceRecording() {
+      if (!recognition) {
+        alert("Speech-to-Text not supported in your browser. Please use Chrome/Edge or type your reasoning.");
+        return;
+      }
+      if (isRecording) stopVoiceRecording();
+      else startVoiceRecording();
+    }
+
+    function startVoiceRecording() {
+      try {
+        recognition.start();
+        isRecording = true;
+        const btn = document.getElementById('toggleRecordBtn');
+        btn.className = "px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg wave-pulse";
+        document.getElementById('recordIcon').className = "fa-solid fa-stop";
+        document.getElementById('recordLabel').innerText = "Stop Speaking";
+        document.getElementById('voiceStatusBadge').innerText = "Listening to microphone...";
+        document.getElementById('voiceStatusBadge').className = "text-rose-400 font-bold";
+        document.getElementById('audioStatusText').innerHTML = `<i class="fa-solid fa-waveform animate-pulse"></i> Transcribing`;
+      } catch (err) {}
+    }
+
+    function stopVoiceRecording() {
+      if (recognition && isRecording) recognition.stop();
+      isRecording = false;
+      const btn = document.getElementById('toggleRecordBtn');
+      btn.className = "px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30";
+      document.getElementById('recordIcon').className = "fa-solid fa-microphone";
+      document.getElementById('recordLabel').innerText = "Record Again";
+      document.getElementById('voiceStatusBadge').innerText = "Voice Recorded";
+      document.getElementById('voiceStatusBadge').className = "text-emerald-400 font-bold";
+      document.getElementById('audioStatusText').innerHTML = `<i class="fa-solid fa-microphone-lines"></i> Ready`;
+      updatePaletteUI();
+    }
+
+    // Palette Generation
+    function buildPalette() {
+      const grid = document.getElementById('paletteGrid');
+      grid.innerHTML = '';
+      questionsPool.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `palette-btn-${idx}`;
+        btn.className = "h-8 rounded-lg border border-slate-800 bg-slate-900 text-xs font-mono font-bold text-slate-400 hover:border-slate-700 transition flex items-center justify-center";
+        btn.innerText = idx + 1;
+        btn.onclick = () => jumpTo(idx);
+        grid.appendChild(btn);
+      });
+      updatePaletteUI();
+    }
+
+    function jumpTo(idx) {
+      if (isRecording) stopVoiceRecording();
+      currentIndex = idx;
+      renderQuestion(currentIndex);
+    }
+
+    // Render Question & Console Types
+    function renderQuestion(index) {
+      const q = questionsPool[index];
+      document.getElementById('qCurrentIndexText').innerText = index + 1;
+      document.getElementById('qCategoryBadge').innerText = q.category;
+      document.getElementById('qPromptText').innerText = `${index + 1}. ${q.question}`;
+
+      const mcqBox = document.getElementById('mcqOptionsContainer');
+      const voiceBox = document.getElementById('voiceQuestionContainer');
+      const codeBox = document.getElementById('codingQuestionContainer');
+
+      // Round Badges
+      const roundBadge = document.getElementById('qRoundBadge');
+      if (q.type === 'mcq') {
+        roundBadge.innerText = "Round 1: Technical MCQ";
+        roundBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+        mcqBox.classList.remove('hidden');
+        voiceBox.classList.add('hidden');
+        codeBox.classList.add('hidden');
+
+        mcqBox.innerHTML = '';
+        q.options.forEach((optText, optIdx) => {
+          const isChosen = (selectedAnswers[index] === optIdx);
+          const optBtn = document.createElement('button');
+          optBtn.className = `w-full text-left p-3.5 rounded-xl border transition flex items-center justify-between text-xs sm:text-sm font-medium ${
+            isChosen 
+              ? 'border-indigo-500 bg-indigo-600/10 text-indigo-300' 
+              : 'border-slate-800 bg-slate-900/60 hover:bg-slate-800 text-slate-300'
+          }`;
+
+          optBtn.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-md font-mono text-xs flex items-center justify-center ${isChosen ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-800 text-slate-400'}">
+                ${String.fromCharCode(65 + optIdx)}
+              </span>
+              <span>${optText}</span>
+            </div>
+            <i class="${isChosen ? 'fa-solid fa-circle-check text-indigo-400' : 'fa-regular fa-circle text-slate-600'}"></i>
+          `;
+
+          optBtn.onclick = () => {
+            selectedAnswers[index] = optIdx;
+            renderQuestion(index);
+            updatePaletteUI();
+          };
+
+          mcqBox.appendChild(optBtn);
+        });
+
+      } else if (q.type === 'voice') {
+        roundBadge.innerText = "Round 2: Voice Articulation";
+        roundBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20";
+        mcqBox.classList.add('hidden');
+        voiceBox.classList.remove('hidden');
+        codeBox.classList.add('hidden');
+
+        const savedTranscript = voiceTranscripts[index];
+        const preview = document.getElementById('voiceTranscriptPreview');
+        const wordCount = document.getElementById('wordCountText');
+        const badge = document.getElementById('voiceStatusBadge');
+
+        if (savedTranscript && savedTranscript.trim()) {
+          preview.innerText = savedTranscript;
+          const words = savedTranscript.trim().split(/\s+/).length;
+          wordCount.innerText = `${words} Words recorded`;
+          badge.innerText = "Voice Answer Captured";
+          badge.className = "text-emerald-400 font-bold";
+        } else {
+          preview.innerText = 'Press "Start Speaking" and answer aloud into your microphone...';
+          wordCount.innerText = "0 Words recorded";
+          badge.innerText = "Mic Idle";
+          badge.className = "text-slate-500";
+        }
+
+      } else if (q.type === 'code') {
+        roundBadge.innerText = "Round 3: Live Coding Challenge";
+        roundBadge.className = "px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        mcqBox.classList.add('hidden');
+        voiceBox.classList.add('hidden');
+        codeBox.classList.remove('hidden');
+
+        const editor = document.getElementById('codeEditorInput');
+        editor.value = codeSubmissions[q.id] || q.starterCode;
+        editor.oninput = (e) => {
+          codeSubmissions[q.id] = e.target.value;
+          updatePaletteUI();
+        };
+      }
+
+      // Prev / Next control
+      document.getElementById('prevBtn').disabled = (index === 0);
+      const nextBtn = document.getElementById('nextBtn');
+      if (index === questionsPool.length - 1) {
+        nextBtn.innerHTML = `<span>Submit All 45</span> <i class="fa-solid fa-check-double"></i>`;
+      } else {
+        nextBtn.innerHTML = `<span>Next Question</span> <i class="fa-solid fa-arrow-right"></i>`;
+      }
+
+      updatePaletteUI();
+    }
+
+    // Code Runner
+    function runCodeTest() {
+      const q = questionsPool[currentIndex];
+      const code = document.getElementById('codeEditorInput').value;
+      const statusBadge = document.getElementById('codeStatusBadge');
+      const outputText = document.getElementById('codeOutputText');
+
+      try {
+        // Evaluate function definition
+        const fn = new Function(`return ${code}`)();
+        if (typeof fn !== 'function') throw new Error("Could not find executable function definition");
+
+        const testPassed = q.testFn(fn);
+        if (testPassed) {
+          statusBadge.innerText = "All Test Cases Passed!";
+          statusBadge.className = "text-emerald-400 font-bold";
+          outputText.innerText = "Test Suite Success: Function executed correctly with verified input assertions.";
+        } else {
+          statusBadge.innerText = "Test Failed";
+          statusBadge.className = "text-rose-400 font-bold";
+          outputText.innerText = "Assertion Error: Output did not match expected value for test assertions.";
+        }
+      } catch (err) {
+        statusBadge.innerText = "Execution Error";
+        statusBadge.className = "text-rose-400 font-bold";
+        outputText.innerText = `Runtime Error: ${err.message}`;
+      }
+      updatePaletteUI();
+    }
+
+    // Palette Highlighting
+    function updatePaletteUI() {
+      let answeredCount = 0;
+      questionsPool.forEach((q, idx) => {
+        const btn = document.getElementById(`palette-btn-${idx}`);
+        if (!btn) return;
+
+        let isAnswered = false;
+        if (q.type === 'mcq') isAnswered = (selectedAnswers[idx] !== null);
+        else if (q.type === 'voice') isAnswered = (voiceTranscripts[idx] && voiceTranscripts[idx].trim().length > 10);
+        else if (q.type === 'code') isAnswered = (codeSubmissions[q.id] && codeSubmissions[q.id].length > 30);
+
+        if (isAnswered) answeredCount++;
+
+        if (idx === currentIndex) {
+          btn.className = "h-8 rounded-lg border-2 border-indigo-500 bg-indigo-500/30 text-xs font-mono font-bold text-white flex items-center justify-center";
+        } else if (isAnswered) {
+          btn.className = "h-8 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-xs font-mono font-bold text-emerald-400 flex items-center justify-center";
+        } else if (q.type === 'voice') {
+          btn.className = "h-8 rounded-lg border border-purple-500/30 bg-purple-500/5 text-xs font-mono font-bold text-purple-300 flex items-center justify-center";
+        } else if (q.type === 'code') {
+          btn.className = "h-8 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs font-mono font-bold text-emerald-300 flex items-center justify-center";
+        } else {
+          btn.className = "h-8 rounded-lg border border-slate-800 bg-slate-900 text-xs font-mono font-bold text-slate-500 flex items-center justify-center";
+        }
+      });
+
+      document.getElementById('answeredCounter').innerText = `${answeredCount} / 45 Done`;
+    }
+
+    function navigate(step) {
+      if (isRecording) stopVoiceRecording();
+      const nextIdx = currentIndex + step;
+      if (nextIdx >= 0 && nextIdx < questionsPool.length) {
+        currentIndex = nextIdx;
+        renderQuestion(currentIndex);
+      }
+    }
+
+    // Countdown Timer
+    function startTimer() {
+      const timerEl = document.getElementById('examTimer');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          alert("Time has elapsed. Automatically evaluating and submitting exam.");
+          finalizeAssessment();
+        }
+      }, 1000);
+    }
+
+    function confirmSubmitTest() {
+      if (isRecording) stopVoiceRecording();
+      let unanswered = 0;
+
+      questionsPool.forEach((q, idx) => {
+        if (q.type === 'mcq' && selectedAnswers[idx] === null) unanswered++;
+        if (q.type === 'voice' && (!voiceTranscripts[idx] || voiceTranscripts[idx].trim().length < 5)) unanswered++;
+        if (q.type === 'code' && (!codeSubmissions[q.id] || codeSubmissions[q.id].length < 20)) unanswered++;
+      });
+
+      let msg = "Are you sure you want to finish and submit your interview answers?";
+      if (unanswered > 0) {
+        msg = `You still have ${unanswered} incomplete question(s) across the 45 questions. Submit anyway?`;
+      }
+      if (confirm(msg)) {
+        finalizeAssessment();
+      }
+    }
+
+    // Evaluation & Cross-sync with HR Console
+    function finalizeAssessment() {
+      clearInterval(timerInterval);
+      if (isRecording) stopVoiceRecording();
+
+      let mcqCorrect = 0;
+      let voiceCorrect = 0;
+      let codeCorrect = 0;
+      const questionAuditRecords = [];
+
+      questionsPool.forEach((q, idx) => {
+        if (q.type === 'mcq') {
+          const choice = selectedAnswers[idx];
+          const isRight = (choice === q.correct);
+          if (isRight) mcqCorrect++;
+
+          questionAuditRecords.push({
+            questionNumber: idx + 1,
+            type: "MCQ",
+            category: q.category,
+            question: q.question,
+            candidateChosen: choice !== null ? q.options[choice] : "SKIPPED",
+            correctAnswer: q.options[q.correct],
+            isCorrect: isRight
+          });
+
+        } else if (q.type === 'voice') {
+          const transcript = (voiceTranscripts[idx] || "").toLowerCase();
+          const wordCount = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
+          let matchedKw = 0;
+          if (q.keywords) {
+            q.keywords.forEach(kw => { if (transcript.includes(kw.toLowerCase())) matchedKw++; });
+          }
+          const isVoicePass = (wordCount >= (q.idealLength || 10)) && (matchedKw >= 2);
+          if (isVoicePass) voiceCorrect++;
+
+          questionAuditRecords.push({
+            questionNumber: idx + 1,
+            type: "Voice Question",
+            category: q.category,
+            question: q.question,
+            candidateChosen: transcript.trim() ? `[Spoken Voice]: "${transcript.trim()}" (${wordCount} words)` : "NO VOICE RECORDED",
+            correctAnswer: `Expected keywords: ${q.keywords.slice(0, 4).join(", ")}...`,
+            isCorrect: isVoicePass
+          });
+
+        } else if (q.type === 'code') {
+          const code = codeSubmissions[q.id] || "";
+          let codePass = false;
+          try {
+            const fn = new Function(`return ${code}`)();
+            codePass = q.testFn(fn);
+          } catch (e) { codePass = false; }
+
+          if (codePass) codeCorrect++;
+
+          questionAuditRecords.push({
+            questionNumber: idx + 1,
+            type: "Coding Challenge",
+            category: q.category,
+            question: q.question,
+            candidateChosen: `[Code Solution]:\n${code}`,
+            correctAnswer: "Function must satisfy assertions and return correct output",
+            isCorrect: codePass
+          });
+        }
+      });
+
+      // Total Score Calculation (20 MCQ + 15 Voice + 10 Coding = 45 total points)
+      const totalCorrect = mcqCorrect + voiceCorrect + codeCorrect;
+      const percentage = Math.round((totalCorrect / questionsPool.length) * 100);
+      const isEligible = (percentage >= 60);
+
+      const candidateSubmission = {
+        name: candidate.name || "Candidate Applicant",
+        email: (candidate.email || "candidate@eval.ai").toLowerCase(),
+        phone: candidate.phone || "9876543210",
+        role: candidate.role || "Software Developer",
+        score: percentage,
+        correctCount: totalCorrect,
+        mcqScore: `${mcqCorrect}/20`,
+        voiceScore: `${voiceCorrect}/15`,
+        codeScore: `${codeCorrect}/10`,
+        totalQuestions: questionsPool.length,
+        eligible: isEligible ? "ELIGIBLE" : "NOT ELIGIBLE",
+        answers: questionAuditRecords,
+        completedAt: new Date().toLocaleString()
+      };
+
+      // Push to shared database for HR Console
+      let database = JSON.parse(localStorage.getItem('ai_interview_candidates') || '[]');
+      const matchIndex = database.findIndex(c => c.email === candidateSubmission.email);
+      if (matchIndex !== -1) {
+        database[matchIndex] = candidateSubmission;
+      } else {
+        database.unshift(candidateSubmission);
+      }
+      localStorage.setItem('ai_interview_candidates', JSON.stringify(database));
+
+      // Display Final Complete Modal
+      showResultModal(candidateSubmission, mcqCorrect, voiceCorrect, codeCorrect);
+    }
+
+    function showResultModal(record, mcqCorrect, voiceCorrect, codeCorrect) {
+      document.getElementById('completionOverlay').classList.remove('hidden');
+
+      const isPass = (record.eligible === "ELIGIBLE");
+      const icon = document.getElementById('resultIcon');
+      const verdict = document.getElementById('resVerdict');
+
+      if (isPass) {
+        icon.className = "w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto mb-4";
+        icon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        verdict.className = "px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        verdict.innerText = "ELIGIBLE";
+      } else {
+        icon.className = "w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-3xl mx-auto mb-4";
+        icon.innerHTML = `<i class="fa-solid fa-circle-xmark"></i>`;
+        verdict.className = "px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        verdict.innerText = "NOT ELIGIBLE";
+      }
+
+      document.getElementById('resName').innerText = record.name;
+      document.getElementById('resMcqScore').innerText = `${mcqCorrect} / 20 Correct`;
+      document.getElementById('resVoiceScore').innerText = `${voiceCorrect} / 15 Qualified`;
+      document.getElementById('resCodeScore').innerText = `${codeCorrect} / 10 Tested`;
+      document.getElementById('resTotalScore').innerText = `${record.correctCount} / 45 (${record.score}%)`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR & Recruiter Portal | AI-Based Interview Evaluation System</title>
+
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          },
+          animation: {
+            'blob-float': 'blobFloat 18s ease-in-out infinite alternate',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            'shimmer-vertical': 'shimmerVert 4s ease-in-out infinite',
+            'float-subtle': 'floatSubtle 3s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            blobFloat: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '50%': { transform: 'translate(60px, -40px) scale(1.12)' },
+              '100%': { transform: 'translate(-40px, 30px) scale(0.95)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', filter: 'blur(35px)' },
+              '50%': { opacity: '0.7', filter: 'blur(50px)' },
+            },
+            shimmerVert: {
+              '0%, 100%': { backgroundPosition: '0% 0%' },
+              '50%': { backgroundPosition: '0% 100%' },
+            },
+            floatSubtle: {
+              '0%': { transform: 'translateY(0px)' },
+              '100%': { transform: 'translateY(-8px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .dark .glass-panel {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1.2px, transparent 1.2px);
+    }
+    .dark .bg-grid-pattern {
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1.2px, transparent 1.2px);
+    }
+
+    /* Button Click Ripple Animation */
+    .btn-anim-click {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .btn-anim-click:active {
+      transform: scale(0.97) !important;
+    }
+    .btn-ripple-wave {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      animation: rippleEffect 0.65s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleEffect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Vertical Text */
+    .vertical-text-wrap {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+    .animated-portal-text {
+      background: linear-gradient(180deg, #6366f1, #06b6d4, #a855f7, #6366f1);
+      background-size: 100% 300%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmerVert 4s linear infinite;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 dark:bg-[#070b19] text-slate-800 dark:text-slate-100 font-sans transition-colors duration-500 overflow-x-hidden relative flex flex-col justify-between">
+
+  <!-- Left Side Vertical Animated Brand -->
+  <div class="fixed left-3 lg:left-6 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col items-center pointer-events-none select-none">
+    <div class="relative flex items-center justify-center mb-4">
+      <span class="absolute w-5 h-5 rounded-full bg-cyan-400/40 animate-ping"></span>
+      <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-brand-500 to-cyan-400 shadow-lg shadow-cyan-400/50"></span>
+    </div>
+    <div class="w-[2px] h-12 bg-gradient-to-b from-brand-500/50 to-transparent mb-3"></div>
+    <div class="vertical-text-wrap py-2 animate-float-subtle">
+      <span class="animated-portal-text text-xl lg:text-2xl font-black tracking-[0.35em] uppercase drop-shadow-md">
+        HR PORTAL
+      </span>
+    </div>
+    <div class="w-[2px] h-12 bg-gradient-to-t from-brand-500/50 to-transparent mt-3"></div>
+    <div class="mt-2 text-[10px] font-mono tracking-widest text-slate-400 dark:text-slate-500 uppercase [writing-mode:vertical-rl] [transform:rotate(180deg)]">
+      EVALUATOR SECURE
+    </div>
+  </div>
+
+  <!-- Dynamic Ambient Orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-brand-500/25 dark:bg-brand-600/20 rounded-full animate-blob-float filter blur-3xl"></div>
+    <div class="absolute top-1/3 -right-24 w-[28rem] h-[28rem] bg-cyan-400/20 dark:bg-cyan-600/15 rounded-full animate-blob-float [animation-delay:4s] filter blur-3xl"></div>
+    <div class="absolute -bottom-24 left-1/3 w-80 h-80 bg-purple-500/20 dark:bg-purple-600/15 rounded-full animate-blob-float [animation-delay:8s] filter blur-3xl"></div>
+    <div class="absolute inset-0 bg-grid-pattern opacity-80 pointer-events-none"></div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="relative z-10 w-full max-w-7xl mx-auto px-6 md:pl-20 py-6 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform duration-300">
+        <i class="fa-solid fa-brain text-lg"></i>
+      </div>
+      <div>
+        <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-brand-600 to-slate-800 dark:from-white dark:via-brand-400 dark:to-cyan-200 bg-clip-text text-transparent">
+          AI Interviewer
+        </span>
+        <span class="hidden sm:inline-block ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+          HR Central
+        </span>
+      </div>
+    </a>
+
+    <div class="flex items-center gap-3">
+      <a href="/" class="btn-anim-click text-xs font-semibold px-3 py-2 rounded-xl glass-panel text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-cyan-400 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-left text-[10px] pointer-events-none"></i>
+        <span>Home</span>
+      </a>
+
+      <!-- Sound Toggle -->
+      <button id="soundToggleBtn" onclick="toggleSoundMode()" class="btn-anim-click w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-cyan-400 shadow-sm transition hover:scale-105" title="Toggle Sound FX">
+        <i id="soundIcon" class="fa-solid fa-volume-high pointer-events-none"></i>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button id="themeToggleBtn" onclick="toggleTheme()" class="btn-anim-click relative px-3.5 h-10 rounded-xl glass-panel flex items-center gap-2 text-slate-700 dark:text-slate-200 hover:border-brand-500/40 shadow-sm transition hover:scale-105" title="Toggle Day/Night Mode">
+        <span id="themeIconContainer" class="pointer-events-none">
+          <i class="fa-solid fa-moon text-indigo-400"></i>
+        </span>
+        <span id="themeLabel" class="text-xs font-bold tracking-wide uppercase hidden sm:inline-block pointer-events-none">Night</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Auth Center Container -->
+  <main class="relative z-10 w-full max-w-xl mx-auto px-4 md:pl-16 py-6 my-auto">
+    <div class="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20 dark:border-slate-800/80">
+      
+      <!-- Top Title Badge -->
+      <div class="text-center mb-7">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2 border border-cyan-500/20">
+          <i class="fa-solid fa-shield-halved text-[10px]"></i> Evaluator Access
+        </div>
+        <h2 id="authHeading" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Recruiter Sign In
+        </h2>
+        <p id="authSubheading" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Access candidate pipelines, scoring matrices, and session replays
+        </p>
+      </div>
+
+      <!-- Segmented Switcher Pill (Login vs Signup) -->
+      <div class="relative bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-2xl flex items-center mb-7 border border-slate-300/40 dark:border-slate-700/60">
+        <button id="tabLogin" onclick="switchAuthTab('login')" class="btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-white bg-brand-600 shadow-md">
+          Sign In
+        </button>
+        <button id="tabSignup" onclick="switchAuthTab('signup')" class="btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+          Create Account
+        </button>
+      </div>
+
+      <!-- ==================== LOGIN FORM ==================== -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Corporate Email</label>
+          <div class="relative">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="email" id="loginEmail" required placeholder="hr@company.com" value="hr@techcorp.com" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Access Password</label>
+            <button type="button" onclick="autofillDemoCreds()" class="text-[11px] font-semibold text-brand-600 dark:text-cyan-400 hover:underline">Autofill Demo</button>
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="password" id="loginPass" required placeholder="••••••••••••" value="HRAdmin#2026" class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            <button type="button" onclick="togglePassVisibility('loginPass', 'eyeLogin')" class="btn-anim-click absolute right-2.5 top-2 w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">
+              <i id="eyeLogin" class="fa-regular fa-eye pointer-events-none"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs pt-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600 dark:text-slate-400">
+            <input type="checkbox" id="rememberMe" checked class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+            <span>Keep me authenticated</span>
+          </label>
+          <a href="#" onclick="showToast('Password reset link sent to demo mail', 'info'); return false;" class="text-brand-600 dark:text-brand-400 hover:underline font-semibold">Forgot Password?</a>
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="btn-anim-click w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 mt-2">
+          <span>Sign In to Dashboard</span>
+          <i class="fa-solid fa-arrow-right text-xs pointer-events-none"></i>
+        </button>
+      </form>
+
+      <!-- ==================== SIGNUP FORM ==================== -->
+      <form id="signupForm" onsubmit="handleSignupSubmit(event)" class="space-y-4 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">First Name</label>
+            <div class="relative">
+              <i class="fa-regular fa-user absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="signupFirstName" required placeholder="Sarah" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Last Name</label>
+            <div class="relative">
+              <i class="fa-regular fa-user absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="signupLastName" required placeholder="Jenkins" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/50">
+          <div id="signupPhotoPreview" class="w-14 h-14 rounded-full bg-brand-500/15 text-brand-600 dark:text-brand-400 flex items-center justify-center overflow-hidden shrink-0">
+            <i class="fa-solid fa-camera text-lg"></i>
+          </div>
+          <div class="min-w-0">
+            <label for="signupPhoto" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Profile Photo</label>
+            <input type="file" id="signupPhoto" accept="image/png,image/jpeg,image/webp" onchange="previewSignupPhoto(event)" class="block w-full text-[11px] text-slate-500 dark:text-slate-400 file:mr-2 file:rounded-lg file:border-0 file:bg-brand-500/10 file:px-2.5 file:py-1.5 file:text-[11px] file:font-semibold file:text-brand-600 dark:file:text-brand-400" />
+            <p class="text-[10px] text-slate-400 mt-1">JPG, PNG, or WEBP up to 2 MB</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Work Email</label>
+          <div class="relative">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="email" id="signupEmail" required placeholder="sarah.j@enterprise.com" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+            <div class="relative">
+              <i class="fa-solid fa-phone absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="tel" id="signupPhone" required placeholder="+1 555 010 2026" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Job Title</label>
+            <div class="relative">
+              <i class="fa-solid fa-id-badge absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+              <input type="text" id="signupJobTitle" required placeholder="Talent Acquisition Lead" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Office Location</label>
+          <div class="relative">
+            <i class="fa-solid fa-location-dot absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="text" id="signupLocation" required placeholder="New York, United States" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Company Name & Department</label>
+          <div class="relative">
+            <i class="fa-solid fa-building absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="text" id="signupCompany" required placeholder="Apex Technologies (Talent Acquisition)" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Create Secure Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-xs text-slate-400"></i>
+            <input type="password" id="signupPass" oninput="evaluatePasswordStrength(this.value)" required placeholder="At least 8 chars" class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white" />
+            <button type="button" onclick="togglePassVisibility('signupPass', 'eyeSignup')" class="btn-anim-click absolute right-2.5 top-2 w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">
+              <i id="eyeSignup" class="fa-regular fa-eye pointer-events-none"></i>
+            </button>
+          </div>
+
+          <!-- Password Dynamic Strength Bar -->
+          <div class="mt-2 space-y-1">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-500 dark:text-slate-400 font-medium">Password Reliability:</span>
+              <span id="strengthLabel" class="font-bold text-slate-400">None</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+              <div id="strengthBar" class="h-full bg-slate-400 w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500 dark:text-slate-400 pt-1">
+          By registering, you agree to AI Interview Evaluator's 
+          <a href="#" class="text-brand-600 dark:text-cyan-400 underline">Auditing Policy</a> & 
+          <a href="#" class="text-brand-600 dark:text-cyan-400 underline">Privacy Protocols</a>.
+        </div>
+
+        <button type="submit" id="signupSubmitBtn" class="btn-anim-click w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-600 to-brand-600 hover:from-cyan-700 hover:to-brand-700 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 mt-2">
+          <span>Create Recruiter Profile</span>
+          <i class="fa-solid fa-user-plus text-xs pointer-events-none"></i>
+        </button>
+      </form>
+
+      <!-- Bottom Security Notice -->
+      <div class="mt-8 pt-5 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-400">
+        <i class="fa-solid fa-lock text-[10px] text-emerald-500"></i>
+        <span>256-Bit SSL Encrypted Enterprise Workspace</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 w-full max-w-7xl mx-auto px-6 md:pl-20 py-6 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200/40 dark:border-slate-800/40 mt-8">
+    <div>&copy; 2026 AI-Based Interview Evaluation System. All rights reserved.</div>
+    <div class="flex items-center gap-3">
+      <span>Evaluator Service Status:</span>
+      <span class="inline-flex items-center gap-1.5 text-emerald-500 font-semibold"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Systems Nominal</span>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // --- 1. Button Click Ripple Shockwave Effect ---
+    document.addEventListener('click', function(e) {
+      const targetBtn = e.target.closest('button, .btn-anim-click');
+      if (!targetBtn) return;
+
+      const rect = targetBtn.getBoundingClientRect();
+      const diameter = Math.max(rect.width, rect.height);
+      const radius = diameter / 2;
+
+      const ripple = document.createElement('span');
+      ripple.className = 'btn-ripple-wave';
+      ripple.style.width = ripple.style.height = `${diameter}px`;
+      ripple.style.left = `${e.clientX - rect.left - radius}px`;
+      ripple.style.top = `${e.clientY - rect.top - radius}px`;
+
+      const existing = targetBtn.querySelector('.btn-ripple-wave');
+      if (existing) existing.remove();
+
+      targetBtn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
+    });
+
+    // --- 2. Audio Synthesis (Web Audio API) ---
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function triggerSound(type) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(880, now + 0.1);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'switch') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.1);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }
+      } catch (e) {}
+    }
+
+    function toggleSoundMode() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        icon.className = 'fa-solid fa-volume-high pointer-events-none';
+        showToast('Sound cues enabled', 'info');
+        triggerSound('click');
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark text-slate-400 pointer-events-none';
+        showToast('Sound muted', 'info');
+      }
+    }
+
+    // --- 3. Day / Night Theme Management ---
+    function initTheme() {
+      const savedTheme = localStorage.getItem('app_theme') || 'dark';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      triggerSound('click');
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+      updateThemeUI(isDark);
+      showToast(isDark ? 'Dark Night Mode Activated' : 'Day Mode Activated', 'info');
+    }
+
+    function updateThemeUI(isDark) {
+      const iconContainer = document.getElementById('themeIconContainer');
+      const label = document.getElementById('themeLabel');
+      if (isDark) {
+        iconContainer.innerHTML = '<i class="fa-solid fa-moon text-indigo-400 text-sm"></i>';
+        label.innerText = 'Night';
+      } else {
+        iconContainer.innerHTML = '<i class="fa-solid fa-sun text-amber-500 text-sm"></i>';
+        label.innerText = 'Day';
+      }
+    }
+
+    // --- 4. Switch Between Login and Signup Tabs ---
+    function switchAuthTab(mode) {
+      triggerSound('switch');
+      const tabLogin = document.getElementById('tabLogin');
+      const tabSignup = document.getElementById('tabSignup');
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const heading = document.getElementById('authHeading');
+      const subheading = document.getElementById('authSubheading');
+
+      if (mode === 'login') {
+        tabLogin.className = "btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-white bg-brand-600 shadow-md";
+        tabSignup.className = "btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        heading.innerText = "Recruiter Sign In";
+        subheading.innerText = "Access candidate pipelines, scoring matrices, and session replays";
+      } else {
+        tabSignup.className = "btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-white bg-gradient-to-r from-cyan-600 to-brand-600 shadow-md";
+        tabLogin.className = "btn-anim-click relative w-1/2 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 z-10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        heading.innerText = "Register Recruiter Profile";
+        subheading.innerText = "Set up your HR evaluation team workspace in seconds";
+      }
+    }
+
+    // --- 5. Password Strength Meter ---
+    function evaluatePasswordStrength(val) {
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const bar = document.getElementById('strengthBar');
+      const label = document.getElementById('strengthLabel');
+
+      if (!val) {
+        bar.style.width = '0%';
+        bar.className = 'h-full bg-slate-400 transition-all duration-300';
+        label.innerText = 'None';
+        label.className = 'font-bold text-slate-400';
+        return;
+      }
+
+      if (score <= 1) {
+        bar.style.width = '25%';
+        bar.className = 'h-full bg-rose-500 transition-all duration-300';
+        label.innerText = 'Weak';
+        label.className = 'font-bold text-rose-500';
+      } else if (score === 2) {
+        bar.style.width = '50%';
+        bar.className = 'h-full bg-amber-500 transition-all duration-300';
+        label.innerText = 'Fair';
+        label.className = 'font-bold text-amber-500';
+      } else if (score === 3) {
+        bar.style.width = '75%';
+        bar.className = 'h-full bg-cyan-500 transition-all duration-300';
+        label.innerText = 'Good';
+        label.className = 'font-bold text-cyan-500';
+      } else {
+        bar.style.width = '100%';
+        bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+        label.innerText = 'Optimal (Secure)';
+        label.className = 'font-bold text-emerald-500';
+      }
+    }
+
+    // --- 6. Form Handlers & Redirects ---
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      triggerSound('success');
+      const email = document.getElementById('loginEmail').value;
+      const btn = document.getElementById('loginSubmitBtn');
+
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying Credentials...`;
+      btn.disabled = true;
+
+      // Simulate authentication and set session data
+      setTimeout(() => {
+        sessionStorage.setItem('hr_session', JSON.stringify({
+          email: email,
+          role: 'Lead Technical Recruiter',
+          authenticatedAt: new Date().toISOString()
+        }));
+        showToast('Login successful! Loading Admin Console...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/admin-dashboard/';
+        }, 800);
+      }, 900);
+    }
+
+    function previewSignupPhoto(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('signupPhotoPreview');
+      if (!file) {
+        preview.innerHTML = '<i class="fa-solid fa-camera text-lg"></i>';
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        e.target.value = '';
+        preview.innerHTML = '<i class="fa-solid fa-camera text-lg"></i>';
+        showToast('Profile photo must be smaller than 2 MB', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.innerHTML = `<img src="${reader.result}" alt="Profile preview" class="w-full h-full object-cover">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleSignupSubmit(e) {
+      e.preventDefault();
+      triggerSound('success');
+      const first = document.getElementById('signupFirstName').value;
+      const last = document.getElementById('signupLastName').value;
+      const email = document.getElementById('signupEmail').value;
+      const company = document.getElementById('signupCompany').value;
+      const phone = document.getElementById('signupPhone').value;
+      const jobTitle = document.getElementById('signupJobTitle').value;
+      const location = document.getElementById('signupLocation').value;
+      const photoFile = document.getElementById('signupPhoto').files[0];
+      const btn = document.getElementById('signupSubmitBtn');
+
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Provisioning Profile...`;
+      btn.disabled = true;
+
+      let photo = '';
+      if (photoFile) {
+        photo = await readFileAsDataUrl(photoFile);
+      }
+
+      setTimeout(() => {
+        sessionStorage.setItem('hr_session', JSON.stringify({
+          name: `${first} ${last}`,
+          email: email,
+          company: company,
+          phone: phone,
+          jobTitle: jobTitle,
+          location: location,
+          photo: photo,
+          role: 'Recruiter Admin',
+          authenticatedAt: new Date().toISOString()
+        }));
+        showToast(`Account created for ${first}! Loading Dashboard...`, 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/admin-dashboard/';
+        }, 900);
+      }, 1100);
+    }
+
+    function togglePassVisibility(inputId, eyeId) {
+      triggerSound('click');
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(eyeId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash pointer-events-none';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye pointer-events-none';
+      }
+    }
+
+    function autofillDemoCreds() {
+      triggerSound('click');
+      document.getElementById('loginEmail').value = 'hr@techcorp.com';
+      document.getElementById('loginPass').value = 'HRAdmin#2026';
+      showToast('Demo recruiter credentials pre-filled!', 'info');
+    }
+
+    // --- 7. Toast Messaging ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const iconMap = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-circle-info text-cyan-400'
+      };
+
+      toast.className = `px-4 py-3 rounded-xl glass-panel border border-white/20 shadow-xl text-slate-800 dark:text-white text-xs font-semibold flex items-center gap-2.5 transform transition-all duration-300 translate-y-3 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid ${iconMap[type] || iconMap.info}"></i> <span>${message}</span>`;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-y-3', 'opacity-0'));
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Initialize Theme
+    document.addEventListener('DOMContentLoaded', initTheme);
+  </script>
+</body>
+</html>

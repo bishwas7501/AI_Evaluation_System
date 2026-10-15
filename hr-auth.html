@@ -572,7 +572,7 @@
       const btn = document.getElementById('loginSubmitBtn');
 
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying Credentials...`;
-      btn.disabled = true;
+      btn.disabled = true;  
 
       // Simulate authentication and set session data
       setTimeout(() => {
@@ -677,7 +677,7 @@
     function autofillDemoCreds() {
       triggerSound('click');
       document.getElementById('loginEmail').value = 'hr@techcorp.com';
-      document.getElementById('loginPass').value = 'HRAdmin#2026';
+      document.getElementById('loginPass').value = 'Admin@123';
       showToast('Demo recruiter credentials pre-filled!', 'info');
     }
 
