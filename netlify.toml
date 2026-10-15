@@ -1,0 +1,29 @@
+[build]
+  publish = "."
+
+# The pages link to Django-style routes (e.g. /candidate-auth/). On Netlify the
+# site is served statically, so map each route to its HTML file.
+[[redirects]]
+  from = "/candidate-auth/*"
+  to = "/candidate-auth.html"
+  status = 200
+
+[[redirects]]
+  from = "/hr-auth/*"
+  to = "/hr-auth.html"
+  status = 200
+
+[[redirects]]
+  from = "/instructions/*"
+  to = "/instructions.html"
+  status = 200
+
+[[redirects]]
+  from = "/interview/*"
+  to = "/interview.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-dashboard/*"
+  to = "/admin.html"
+  status = 200
